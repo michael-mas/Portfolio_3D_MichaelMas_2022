@@ -587,13 +587,12 @@ class ThirdPersonCameraDemo {
  // Moon Majora's Mask
 
 const moonTexture = new THREE.TextureLoader().load('resources/images/moon.jpg');
-const normalTexture = new THREE.TextureLoader().load('resources/images/normal.jpg');
+
 
 const moon = new THREE.Mesh(
   new THREE.SphereGeometry(12, 128, 128),
   new THREE.MeshBasicMaterial({
     map: moonTexture,
-    normalMap: normalTexture,
   })
 );
 moon.position.set(85, 80, 220);
