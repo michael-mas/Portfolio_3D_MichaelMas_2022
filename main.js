@@ -181,16 +181,16 @@ class BasicCharacterControllerInput {
 
   _onKeyDown(event) {
     switch (event.keyCode) {
-      case 87: // w
+      case 38: // w
         this._keys.forward = true;
         break;
-      case 65: // a
+      case 37: // a
         this._keys.left = true;
         break;
-      case 83: // s
+      case 40: // s
         this._keys.backward = true;
         break;
-      case 68: // d
+      case 39: // d
         this._keys.right = true;
         break;
       case 32: // SPACE
@@ -204,16 +204,16 @@ class BasicCharacterControllerInput {
 
   _onKeyUp(event) {
     switch(event.keyCode) {
-      case 87: // w
+      case 38: // w
         this._keys.forward = false;
         break;
-      case 65: // a
+      case 37: // a
         this._keys.left = false;
         break;
-      case 83: // s
+      case 40: // s
         this._keys.backward = false;
         break;
-      case 68: // d
+      case 39: // d
         this._keys.right = false;
         break;
       case 32: // SPACE
@@ -596,7 +596,7 @@ const moon = new THREE.Mesh(
     normalMap: normalTexture,
   })
 );
-moon.position.set(25, 40, 80);
+moon.position.set(85, 80, 220);
 moon.rotateY(Math.PI/1.5);
 this._scene.add(moon);
 
