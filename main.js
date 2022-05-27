@@ -1,8 +1,42 @@
-import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.118/build/three.module.js';
+import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.124/build/three.module.js';
 
-import {FBXLoader} from 'https://cdn.jsdelivr.net/npm/three@0.118.1/examples/jsm/loaders/FBXLoader.js';
-import {GLTFLoader} from 'https://cdn.jsdelivr.net/npm/three@0.118.1/examples/jsm/loaders/GLTFLoader.js';
+import {FBXLoader} from 'https://cdn.jsdelivr.net/npm/three@0.124/examples/jsm/loaders/FBXLoader.js';
+//import {GLTFLoader} from 'https://cdn.jsdelivr.net/npm/three@0.118.1/examples/jsm/loaders/GLTFLoader.js';
 
+import { TextGeometry } from './resources/modules/TextGeometry.js';
+import { FontLoader } from './resources/modules/FontLoader.js';
+
+
+
+
+//Loading constructor
+
+const loadingManager = new THREE.LoadingManager();
+
+// loadingManager.onStart = function(url, item, total){
+//    console.log(`Started Loading: ${url}`);
+// }
+
+  const progressBar = document.getElementById('progress-bar');
+
+    loadingManager.onProgress = function(url, loaded, total){
+      progressBar.value = (loaded / total) * 100;
+    }
+
+    const progressBarContainer = document.querySelector('.progress-bar-container');
+
+  loadingManager.onLoad = function(){
+    progressBarContainer.style.display = 'none';
+  }
+
+//  loadingManager.onError = function(url){
+//      console.error(`Got problem Loading: ${url}`);
+//    }
+
+
+
+
+//Control character 
 
 class BasicCharacterControllerProxy {
   constructor(animations) {
@@ -20,6 +54,8 @@ class BasicCharacterController {
     this._Init(params);
   }
 
+//movements parameter
+
   _Init(params) {
     this._params = params;
     this._decceleration = new THREE.Vector3(-0.0005, -0.0001, -5.0);
@@ -35,14 +71,20 @@ class BasicCharacterController {
     this._LoadModels();
   }
 
+
+
+
+  //Load texture of model character with fbx
+
   _LoadModels() {
-    const loader = new FBXLoader();
-    loader.setPath('./resources/me/');
-    loader.load('mremireh_o_desbiens.fbx', (fbx) => {
+    const loader = new FBXLoader(loadingManager);
+    loader.setPath('./resources/avatar/');
+    loader.load('character.fbx', (fbx) => {
       fbx.scale.setScalar(0.1);
       fbx.traverse(c => {
         c.castShadow = true;
       });
+      
 
       this._target = fbx;
       this._params.scene.add(this._target);
@@ -64,14 +106,18 @@ class BasicCharacterController {
         };
       };
 
+//Load differents animations of character
+
       const loader = new FBXLoader(this._manager);
-      loader.setPath('./resources/me/');
-      loader.load('walk.fbx', (a) => { _OnLoad('walk', a); });
-      loader.load('run.fbx', (a) => { _OnLoad('run', a); });
-      loader.load('idle.fbx', (a) => { _OnLoad('idle', a); });
-      loader.load('dance.fbx', (a) => { _OnLoad('dance', a); });
+      loader.setPath('./resources/avatar/');
+      loader.load('Walk.fbx', (a) => { _OnLoad('walk', a); });
+      loader.load('Run.fbx', (a) => { _OnLoad('run', a); });
+      loader.load('Idle.fbx', (a) => { _OnLoad('idle', a); });
+      loader.load('Dance.fbx', (a) => { _OnLoad('dance', a); });
     });
   }
+
+// Position and roration
 
   get Position() {
     return this._position;
@@ -83,6 +129,8 @@ class BasicCharacterController {
     }
     return this._target.quaternion;
   }
+
+// Uptade position
 
   Update(timeInSeconds) {
     if (!this._stateMachine._currentState) {
@@ -161,6 +209,8 @@ class BasicCharacterController {
   }
 };
 
+//Make differents actions of character and keyCode of actions
+
 class BasicCharacterControllerInput {
   constructor() {
     this._Init();    
@@ -181,16 +231,16 @@ class BasicCharacterControllerInput {
 
   _onKeyDown(event) {
     switch (event.keyCode) {
-      case 38: // w
+      case 38: // up
         this._keys.forward = true;
         break;
-      case 37: // a
+      case 37: // left
         this._keys.left = true;
         break;
-      case 40: // s
+      case 40: // back
         this._keys.backward = true;
         break;
-      case 39: // d
+      case 39: // right
         this._keys.right = true;
         break;
       case 32: // SPACE
@@ -204,16 +254,16 @@ class BasicCharacterControllerInput {
 
   _onKeyUp(event) {
     switch(event.keyCode) {
-      case 38: // w
+      case 38: // up
         this._keys.forward = false;
         break;
-      case 37: // a
+      case 37: // left
         this._keys.left = false;
         break;
-      case 40: // s
+      case 40: // back
         this._keys.backward = false;
         break;
-      case 39: // d
+      case 39: // right
         this._keys.right = false;
         break;
       case 32: // SPACE
@@ -268,6 +318,7 @@ class CharacterFSM extends FiniteStateMachine {
     this._Init();
   }
 
+// Link animation to actions movements
   _Init() {
     this._AddState('idle', IdleState);
     this._AddState('walk', WalkState);
@@ -287,7 +338,7 @@ class State {
   Update() {}
 };
 
-
+// Let's dance and loop !
 class DanceState extends State {
   constructor(parent) {
     super(parent);
@@ -338,6 +389,7 @@ class DanceState extends State {
   }
 };
 
+// Let's walk
 
 class WalkState extends State {
   constructor(parent) {
@@ -373,6 +425,8 @@ class WalkState extends State {
 
   Exit() {
   }
+
+// Let's Run
 
   Update(timeElapsed, input) {
     if (input._keys.forward || input._keys.backward) {
@@ -440,6 +494,7 @@ class IdleState extends State {
     super(parent);
   }
 
+// Let's Idle
   get Name() {
     return 'idle';
   }
@@ -544,7 +599,7 @@ class ThirdPersonCameraDemo {
 
     let light = new THREE.DirectionalLight(0xFFFFFF, 1.0);
     light.position.set(-100, 100, 100);
-    light.target.position.set(0, 0, 0);
+    light.target.position.set(10, 0, 0);
     light.castShadow = true;
     light.shadow.bias = -0.001;
     light.shadow.mapSize.width = 4096;
@@ -561,6 +616,12 @@ class ThirdPersonCameraDemo {
 
     light = new THREE.AmbientLight(0xFFFFFF, 0.25);
     this._scene.add(light);
+  
+
+
+ 
+
+//Create cube and image of face of this cube for environnement
 
     const loader = new THREE.CubeTextureLoader();
     const texture = loader.load([
@@ -574,15 +635,14 @@ class ThirdPersonCameraDemo {
     texture.encoding = THREE.sRGBEncoding;
     this._scene.background = texture;
 
- //create grid overlay on plane
- var grid = new THREE.GridHelper(500, 20, 0x000000, 0x000000);
+ // Create grid overlay on plane
+ var grid = new THREE.GridHelper(1000, 20, 0x000000, 0x000000);
  grid.material.opacity = 0.5;
  grid.material.transparent = true;
  grid.position.y = 0.005;
  this._scene.add(grid);
 
 
- //Test
 
  // Moon Majora's Mask
 
@@ -599,10 +659,75 @@ moon.position.set(85, 80, 220);
 moon.rotateY(Math.PI/1.5);
 this._scene.add(moon);
 
+// My Language Cube
 
- //create plane
+const mikaTexture = new THREE.TextureLoader().load('photo.png');
+
+const mika = new THREE.Mesh(new THREE.BoxGeometry(30, 30, 30), new THREE.MeshBasicMaterial({ map: mikaTexture }));
+mika.position.set(-15, 20, 100);
+this._scene.add(mika);
+
+//Cube desktop
+
+const woodTexture = new THREE.TextureLoader().load('./resources/textures/woodTexture.jpg');
+
+const desktop = new THREE.Mesh(new THREE.BoxGeometry(18, 12, 15), new THREE.MeshBasicMaterial({ map: woodTexture }));
+desktop.position.set(-52, 7, 53);
+this._scene.add(desktop);
+
+//Cube Screen desktop
+
+const screenofdeath = new THREE.TextureLoader().load('./resources/textures/screenofdeath.png');
+
+const screen = new THREE.Mesh(new THREE.BoxGeometry(7, 6, 1), new THREE.MeshBasicMaterial({ map: screenofdeath }));
+screen.position.set(-48.05, 18, 53.52);
+screen.rotateY(0.19);
+screen.rotateX(0.1);
+this._scene.add(screen);
+
+// TEXT
+
+// MICHAEL MAS TEXT
+
+const fontLoader = new FontLoader
+fontLoader.load('./resources/fonts/Rubik_Light_Regular.json',(droidFont)=>{
+  const textGeometry = new TextGeometry('MICHAEL MAS', {
+    height:2,
+    size: 10,
+    font: droidFont,
+  });
+  const textMaterial = new THREE.MeshNormalMaterial();
+  const textMesh = new THREE.Mesh(textGeometry, textMaterial);
+  textMesh.position.set(25, 50, 100);
+  //textMesh.rotateX(Math.PI/6);
+  textMesh.rotateY(Math.PI/1);
+  this._scene.add(textMesh);
+});
+
+//DEVELOPPER FULL STACK TEXT
+
+const fontLoader2 = new FontLoader
+fontLoader2.load('./resources/fonts/Rubik_Light_Regular.json',(droidFont)=>{
+  const textGeometry = new TextGeometry('DEVELOPPEUR FULL STACK', {
+    height:2,
+    size: 5,
+    font: droidFont,
+  });
+  const textMaterial = new THREE.MeshBasicMaterial({
+    color: 0x930404
+});
+  const textMesh = new THREE.Mesh(textGeometry, textMaterial);
+  textMesh.position.set(25, 40, 100);
+  //textMesh.rotateX(Math.PI/6);
+  textMesh.rotateY(Math.PI/1);
+  this._scene.add(textMesh);
+});
+
+ 
+ // Create plane (ground)
+
     const plane = new THREE.Mesh(
-        new THREE.PlaneGeometry(500, 500, 10, 10),
+        new THREE.PlaneGeometry(1000, 1000, 10, 10),
         new THREE.MeshStandardMaterial({
             color: 0xffffff,
             transparent: true,
@@ -617,9 +742,149 @@ this._scene.add(moon);
     this._previousRAF = null;
 
     this._LoadAnimatedModel();
+
+    //Animated model
+
+    //Fitness zombie
+    this._LoadAnimatedModelAndPlay(
+      './resources/zombie/', 'mremireh_o_desbiens.fbx', 'run.fbx', new THREE.Vector3(50, 2, 100));
+
+    //Dev Bot
+    this._LoadAnimatedModelAndPlay4(
+      './resources/3dmodel/', 'Entering Code.fbx', 'Entering Code.fbx', new THREE.Vector3(-50, 2, 40));
+  
+
+
+    //static model 
+    
+    //Rolls carpet
+
+    this._LoadAnimatedModelAndPlay2(
+      './resources/3dmodel/', 'Treadmill FBX.fbx', 'Treadmill FBX.fbx', new THREE.Vector3(50, 1, 100));
+
+
+    // Computer
+
+    this._LoadAnimatedModelAndPlay3(
+      './resources/3dmodel/', 'Computer Monitor OLD.fbx', 'Computer Monitor OLD.fbx', new THREE.Vector3(-52, 13.2, 50));
+
     this._RAF();
   }
 
+
+
+
+
+
+// Function animated model
+
+//Zombie
+  _LoadAnimatedModelAndPlay(path, modelFile, animFile, offset) {
+    const loader = new FBXLoader();
+    loader.setPath(path);
+    loader.load(modelFile, (fbx) => {
+      fbx.scale.setScalar(0.1);
+      fbx.traverse(c => {
+        c.castShadow = true;
+      });
+      //console.log(fbx);
+      fbx.position.copy(offset);
+      fbx.rotateY(Math.PI/2);
+
+      const anim = new FBXLoader();
+      anim.setPath(path);
+      anim.load(animFile, (anim) => {
+        const m = new THREE.AnimationMixer(fbx);
+        this._mixers.push(m);
+        const idle = m.clipAction(anim.animations[0]);
+        idle.play();
+      });
+      
+      this._scene.add(fbx);
+    });
+  }
+
+//Rolls carpet
+  _LoadAnimatedModelAndPlay2(path, modelFile, animFile, offset) {
+    const loader = new FBXLoader();
+    loader.setPath(path);
+    loader.load(modelFile, (fbx) => {
+      fbx.scale.setScalar(1);
+      fbx.traverse(c => {
+        c.castShadow = true;
+      });
+      //console.log(fbx);
+      fbx.position.copy(offset);
+      fbx.rotateY(Math.PI/1);
+
+      const anim = new FBXLoader();
+      anim.setPath(path);
+      anim.load(animFile, (anim) => {
+        const m = new THREE.AnimationMixer(fbx);
+        this._mixers.push(m);
+        const idle = m.clipAction(anim.animations[0]);
+        idle.play();
+      });
+      
+      this._scene.add(fbx);
+    });
+  }
+
+//Computer
+  _LoadAnimatedModelAndPlay3(path, modelFile, animFile, offset) {
+    const loader = new FBXLoader();
+    loader.setPath(path);
+    loader.load(modelFile, (fbx) => {
+      fbx.scale.setScalar(0.1);
+      fbx.traverse(c => {
+        c.castShadow = true;
+      });
+      //console.log(fbx);
+      fbx.position.copy(offset);
+      fbx.rotateY(Math.PI/1);
+
+      const anim = new FBXLoader();
+      anim.setPath(path);
+      anim.load(animFile, (anim) => {
+        const m = new THREE.AnimationMixer(fbx);
+        this._mixers.push(m);
+        const idle = m.clipAction(anim.animations[0]);
+        idle.play();
+      });
+      
+      this._scene.add(fbx);
+    });
+  }
+
+//Dev bot
+  _LoadAnimatedModelAndPlay4(path, modelFile, animFile, offset) {
+    const loader = new FBXLoader();
+    loader.setPath(path);
+    loader.load(modelFile, (fbx) => {
+      fbx.scale.setScalar(0.1);
+      fbx.traverse(c => {
+        c.castShadow = true;
+      });
+      //console.log(fbx);
+      fbx.position.copy(offset);
+      //fbx.rotateY(Math.PI/1);
+
+      const anim = new FBXLoader();
+      anim.setPath(path);
+      anim.load(animFile, (anim) => {
+        const m = new THREE.AnimationMixer(fbx);
+        this._mixers.push(m);
+        const idle = m.clipAction(anim.animations[0]);
+        idle.play();
+      });
+      
+      this._scene.add(fbx);
+    });
+  }
+
+
+  
+  //Function animated control character
   _LoadAnimatedModel() {
     const params = {
       camera: this._camera,
@@ -633,6 +898,8 @@ this._scene.add(moon);
     });
   }
 
+
+
   _OnWindowResize() {
     this._camera.aspect = window.innerWidth / window.innerHeight;
     this._camera.updateProjectionMatrix();
@@ -644,7 +911,6 @@ this._scene.add(moon);
       if (this._previousRAF === null) {
         this._previousRAF = t;
       }
-
       this._RAF();
 
       this._threejs.render(this._scene, this._camera);
@@ -699,4 +965,3 @@ _TestLerp(1.0 / 100.0, 1.0 / 50.0);
 _TestLerp(1.0 - Math.pow(0.3, 1.0 / 100.0), 
           1.0 - Math.pow(0.3, 1.0 / 50.0));
 
-          
