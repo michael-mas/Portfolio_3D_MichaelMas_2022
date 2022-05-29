@@ -1,6 +1,8 @@
 import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.124/build/three.module.js';
 
 import {FBXLoader} from 'https://cdn.jsdelivr.net/npm/three@0.124/examples/jsm/loaders/FBXLoader.js';
+
+//Use two type Loader create laggy problem with this environnement project
 //import {GLTFLoader} from 'https://cdn.jsdelivr.net/npm/three@0.118.1/examples/jsm/loaders/GLTFLoader.js';
 
 import { TextGeometry } from './resources/modules/TextGeometry.js';
@@ -24,9 +26,11 @@ const loadingManager = new THREE.LoadingManager();
     }
 
     const progressBarContainer = document.querySelector('.progress-bar-container');
+    const displayModal = document.querySelector('.modal');
 
   loadingManager.onLoad = function(){
     progressBarContainer.style.display = 'none';
+    displayModal.style.visibility = 'visible';
   }
 
 //  loadingManager.onError = function(url){
@@ -70,8 +74,6 @@ class BasicCharacterController {
 
     this._LoadModels();
   }
-
-
 
 
   //Load texture of model character with fbx
@@ -229,6 +231,8 @@ class BasicCharacterControllerInput {
     document.addEventListener('keyup', (e) => this._onKeyUp(e), false);
   }
 
+ 
+
   _onKeyDown(event) {
     switch (event.keyCode) {
       case 38: // up
@@ -318,7 +322,7 @@ class CharacterFSM extends FiniteStateMachine {
     this._Init();
   }
 
-// Link animation to actions movements
+// Parameter animation to actions movements
   _Init() {
     this._AddState('idle', IdleState);
     this._AddState('walk', WalkState);
@@ -495,6 +499,7 @@ class IdleState extends State {
   }
 
 // Let's Idle
+
   get Name() {
     return 'idle';
   }
@@ -526,6 +531,7 @@ class IdleState extends State {
   }
 };
 
+// Third person camera follow
 
 class ThirdPersonCamera {
   constructor(params) {
@@ -572,6 +578,8 @@ class ThirdPersonCameraDemo {
     this._Initialize();
   }
 
+  //Initalize with WebGL in body HTML
+  
   _Initialize() {
     this._threejs = new THREE.WebGLRenderer({
       antialias: true,
@@ -595,7 +603,11 @@ class ThirdPersonCameraDemo {
     this._camera = new THREE.PerspectiveCamera(fov, aspect, near, far);
     this._camera.position.set(25, 10, 25);
 
+//Create scene
+
     this._scene = new THREE.Scene();
+
+// Create light
 
     let light = new THREE.DirectionalLight(0xFFFFFF, 1.0);
     light.position.set(-100, 100, 100);
@@ -625,12 +637,12 @@ class ThirdPersonCameraDemo {
 
     const loader = new THREE.CubeTextureLoader();
     const texture = loader.load([
-        './resources/posx.jpg',
-        './resources/negx.jpg',
-        './resources/posy.jpg',
-        './resources/negy.jpg',
-        './resources/posz.jpg',
-        './resources/negz.jpg',
+        './resources/environnement/posx.jpg',
+        './resources/environnement/negx.jpg',
+        './resources/environnement/posy2.jpg',
+        './resources/environnement/negy.jpg',
+        './resources/environnement/posz.jpg',
+        './resources/environnement/negz.jpg',
     ]);
     texture.encoding = THREE.sRGBEncoding;
     this._scene.background = texture;
@@ -642,48 +654,69 @@ class ThirdPersonCameraDemo {
  grid.position.y = 0.005;
  this._scene.add(grid);
 
+//Easter Egg
+
+    // Moon Majora's Mask
+
+    const moonTexture = new THREE.TextureLoader().load('resources/images/moon.jpg');
 
 
- // Moon Majora's Mask
+    const moon = new THREE.Mesh(
+      new THREE.SphereGeometry(12, 128, 128),
+      new THREE.MeshBasicMaterial({
+        map: moonTexture,
+      })
+    );
+    moon.position.set(85, 80, 220);
+    moon.rotateY(Math.PI/1.5);
+    this._scene.add(moon);
 
-const moonTexture = new THREE.TextureLoader().load('resources/images/moon.jpg');
+  //TEST
+
+  const geometry = new THREE.BoxGeometry( 10, 10, 10 );
+  const material = new THREE.MeshBasicMaterial( {color: 0x00ff00} );
+  const cube = new THREE.Mesh( geometry, material );
+  cube.position.set(52, 7, 53);
+  this._scene.add( cube );
+
+//Cubix Mod :)
+
+    // My Language Cube
+
+    const mikaTexture = new THREE.TextureLoader().load('./resources/textures/photo.png');
+
+    const mika = new THREE.Mesh(new THREE.BoxGeometry(30, 30, 1), new THREE.MeshBasicMaterial({ map: mikaTexture }));
+    mika.position.set(-15, 20, 100);
+    this._scene.add(mika);
+
+    //Border Language Cube
+
+    const boxtexture = new THREE.TextureLoader().load('./resources/textures/metal.png');
+
+    const borderbox = new THREE.Mesh(new THREE.BoxGeometry(33, 33, 2), new THREE.MeshBasicMaterial({ map: boxtexture }));
+    borderbox.position.set(-15, 20, 100.6);
+    this._scene.add(borderbox);
+
+    //Cube desktop
+
+    const woodTexture = new THREE.TextureLoader().load('./resources/textures/woodTexture.jpg');
+
+    const desktop = new THREE.Mesh(new THREE.BoxGeometry(18, 12, 15), new THREE.MeshBasicMaterial({ map: woodTexture }));
+    desktop.position.set(-52, 7, 53);
+    this._scene.add(desktop);
+
+    
 
 
-const moon = new THREE.Mesh(
-  new THREE.SphereGeometry(12, 128, 128),
-  new THREE.MeshBasicMaterial({
-    map: moonTexture,
-  })
-);
-moon.position.set(85, 80, 220);
-moon.rotateY(Math.PI/1.5);
-this._scene.add(moon);
+    //Cube Screen desktop
 
-// My Language Cube
+    const screenofdeath = new THREE.TextureLoader().load('./resources/textures/screenofdeath.png');
 
-const mikaTexture = new THREE.TextureLoader().load('photo.png');
-
-const mika = new THREE.Mesh(new THREE.BoxGeometry(30, 30, 30), new THREE.MeshBasicMaterial({ map: mikaTexture }));
-mika.position.set(-15, 20, 100);
-this._scene.add(mika);
-
-//Cube desktop
-
-const woodTexture = new THREE.TextureLoader().load('./resources/textures/woodTexture.jpg');
-
-const desktop = new THREE.Mesh(new THREE.BoxGeometry(18, 12, 15), new THREE.MeshBasicMaterial({ map: woodTexture }));
-desktop.position.set(-52, 7, 53);
-this._scene.add(desktop);
-
-//Cube Screen desktop
-
-const screenofdeath = new THREE.TextureLoader().load('./resources/textures/screenofdeath.png');
-
-const screen = new THREE.Mesh(new THREE.BoxGeometry(7, 6, 1), new THREE.MeshBasicMaterial({ map: screenofdeath }));
-screen.position.set(-48.05, 18, 53.52);
-screen.rotateY(0.19);
-screen.rotateX(0.1);
-this._scene.add(screen);
+    const screen = new THREE.Mesh(new THREE.BoxGeometry(7, 6, 1), new THREE.MeshBasicMaterial({ map: screenofdeath }));
+    screen.position.set(-48.05, 18, 53.52);
+    screen.rotateY(0.19);
+    screen.rotateX(0.1);
+    this._scene.add(screen);
 
 // TEXT
 
@@ -743,19 +776,21 @@ fontLoader2.load('./resources/fonts/Rubik_Light_Regular.json',(droidFont)=>{
 
     this._LoadAnimatedModel();
 
-    //Animated model
+//Animated model
 
     //Fitness zombie
+
     this._LoadAnimatedModelAndPlay(
       './resources/zombie/', 'mremireh_o_desbiens.fbx', 'run.fbx', new THREE.Vector3(50, 2, 100));
 
     //Dev Bot
+
     this._LoadAnimatedModelAndPlay4(
       './resources/3dmodel/', 'Entering Code.fbx', 'Entering Code.fbx', new THREE.Vector3(-50, 2, 40));
   
 
 
-    //static model 
+//static model 
     
     //Rolls carpet
 
@@ -773,12 +808,9 @@ fontLoader2.load('./resources/fonts/Rubik_Light_Regular.json',(droidFont)=>{
 
 
 
-
-
-
 // Function animated model
 
-//Zombie
+  //Zombie
   _LoadAnimatedModelAndPlay(path, modelFile, animFile, offset) {
     const loader = new FBXLoader();
     loader.setPath(path);
@@ -804,8 +836,9 @@ fontLoader2.load('./resources/fonts/Rubik_Light_Regular.json',(droidFont)=>{
     });
   }
 
-//Rolls carpet
-  _LoadAnimatedModelAndPlay2(path, modelFile, animFile, offset) {
+  //Rolls carpet
+
+  _LoadAnimatedModelAndPlay2(path, modelFile, offset) {
     const loader = new FBXLoader();
     loader.setPath(path);
     loader.load(modelFile, (fbx) => {
@@ -819,19 +852,15 @@ fontLoader2.load('./resources/fonts/Rubik_Light_Regular.json',(droidFont)=>{
 
       const anim = new FBXLoader();
       anim.setPath(path);
-      anim.load(animFile, (anim) => {
-        const m = new THREE.AnimationMixer(fbx);
-        this._mixers.push(m);
-        const idle = m.clipAction(anim.animations[0]);
-        idle.play();
-      });
+     
       
       this._scene.add(fbx);
     });
   }
 
-//Computer
-  _LoadAnimatedModelAndPlay3(path, modelFile, animFile, offset) {
+  //Computer
+
+  _LoadAnimatedModelAndPlay3(path, modelFile, offset) {
     const loader = new FBXLoader();
     loader.setPath(path);
     loader.load(modelFile, (fbx) => {
@@ -845,18 +874,13 @@ fontLoader2.load('./resources/fonts/Rubik_Light_Regular.json',(droidFont)=>{
 
       const anim = new FBXLoader();
       anim.setPath(path);
-      anim.load(animFile, (anim) => {
-        const m = new THREE.AnimationMixer(fbx);
-        this._mixers.push(m);
-        const idle = m.clipAction(anim.animations[0]);
-        idle.play();
-      });
       
       this._scene.add(fbx);
     });
   }
 
-//Dev bot
+  //Dev bot
+
   _LoadAnimatedModelAndPlay4(path, modelFile, animFile, offset) {
     const loader = new FBXLoader();
     loader.setPath(path);
@@ -899,12 +923,15 @@ fontLoader2.load('./resources/fonts/Rubik_Light_Regular.json',(droidFont)=>{
   }
 
 
+  // Resize screen 
 
   _OnWindowResize() {
     this._camera.aspect = window.innerWidth / window.innerHeight;
     this._camera.updateProjectionMatrix();
     this._threejs.setSize(window.innerWidth, window.innerHeight);
   }
+
+  //Let's animated
 
   _RAF() {
     requestAnimationFrame((t) => {
@@ -937,6 +964,8 @@ fontLoader2.load('./resources/fonts/Rubik_Light_Regular.json',(droidFont)=>{
 
 
 let _APP = null;
+
+//Inject to DOM
 
 window.addEventListener('DOMContentLoaded', () => {
   _APP = new ThirdPersonCameraDemo();

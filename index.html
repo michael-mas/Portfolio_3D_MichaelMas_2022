@@ -8,11 +8,20 @@
 </head>
 <body>
 
-  <div class="progress-bar-container">
-    <label for="progress-bar">Loading...</label>
+  <!-- Loader --> 
+  <div class="progress-bar-container"><div class="spinner">
+    <div></div>
+    <div></div>
+    <div></div>
+    <div></div>
+    <div></div>
+    <div></div>
+  </div>
+    <label for="progress-bar">Chargement...</label>
     <progress id="progress-bar" value="0" max="100"></progress>
   </div>
 
+  <!-- Modal --> 
   <div id="myModal" class="modal fade">
     <div class="modal-dialog">
         <div class="modal-content">
@@ -81,6 +90,8 @@
   </script>
  <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.min.js"></script>
+
+ <!-- Modal Script --> 
  <script>
 
    $(document).ready(function(){
@@ -88,5 +99,6 @@
    });
 
  </script>
+
 </body>
 </html>
