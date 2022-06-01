@@ -838,7 +838,7 @@ fontLoader2.load('./resources/fonts/Rubik_Light_Regular.json',(droidFont)=>{
 
   //Rolls carpet
 
-  _LoadAnimatedModelAndPlay2(path, modelFile, offset) {
+  _LoadAnimatedModelAndPlay2(path, modelFile, animFile, offset) {
     const loader = new FBXLoader();
     loader.setPath(path);
     loader.load(modelFile, (fbx) => {
@@ -860,7 +860,7 @@ fontLoader2.load('./resources/fonts/Rubik_Light_Regular.json',(droidFont)=>{
 
   //Computer
 
-  _LoadAnimatedModelAndPlay3(path, modelFile, offset) {
+  _LoadAnimatedModelAndPlay3(path, modelFile, animFile, offset) {
     const loader = new FBXLoader();
     loader.setPath(path);
     loader.load(modelFile, (fbx) => {
